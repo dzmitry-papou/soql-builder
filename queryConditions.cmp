@@ -1,0 +1,131 @@
+<aura:component implements="flexipage:availableForAllPageTypes,flexipage:availableForRecordHome" access="global">
+
+    <aura:attribute name="sObjFields" type="List" />
+    <aura:attribute name="selectedSObjFields" type="List" />
+    <aura:attribute name="isDisabled" type="Boolean" default="true"/>
+
+    <aura:attribute name="fieldForSorting" type="String" />
+    <aura:attribute name="ascOrDescForSorting" type="String" />
+    <aura:attribute name="nullsForSorting" type="String" />
+
+    <aura:attribute name="fieldForFilter" type="String" />
+    <aura:attribute name="filterAction" type="String" />
+    <aura:attribute name="filterValue" type="String" />
+    <aura:attribute name="filterValues" type="List" /> <!-- Const filter values -->
+
+    <aura:attribute name="limit" type="String" />
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    <aura:handler name="change" value="{!v.sObjFields}" action="{!c.clearValues}" />
+    <aura:handler name="change" value="{!v.selectedSObjFields}" action="{!c.changeIsDisabled}" />
+
+    <aura:registerEvent name="sortingEvent" type="c:sortingEvent" />
+    <aura:registerEvent name="filteringEvent" type="c:filteringEvent" />
+    <aura:registerEvent name="limitEvent" type="c:limitEvent" />
+
+    <aura:handler name="change" value="{!v.fieldForSorting}" action="{!c.fireSortingEvent}" />
+    <aura:handler name="change" value="{!v.ascOrDescForSorting}" action="{!c.fireSortingEvent}" />
+    <aura:handler name="change" value="{!v.nullsForSorting}" action="{!c.fireSortingEvent}" />
+    <aura:handler name="change" value="{!v.fieldForFilter}" action="{!c.fireFilteringEvent}" />
+    <aura:handler name="change" value="{!v.filterAction}" action="{!c.fireFilteringEvent}" />
+    <aura:handler name="change" value="{!v.filterValue}" action="{!c.fireFilteringEvent}" />
+    <aura:handler name="change" value="{!v.limit}" action="{!c.fireLimitEvent}" />
+
+    <div>
+        <div class="slds-grid " >
+            <div class="slds-col  slds-size_1-of-3">
+                <div class="slds-var-p-right_xx-small">
+                    <lightning:select 
+                        name="selectFieldForSorting" 
+                        value="{!v.fieldForSorting}" 
+                        label="Sort results by field:" 
+                        disabled="{!v.isDisabled}">
+                            <option value=""></option>
+                            <aura:iteration items="{!v.sObjFields}" var="field">
+                                <option value="{!field}">{!field}</option>
+                            </aura:iteration>
+                    </lightning:select>
+                </div>
+            </div>
+            <div class="slds-col  slds-size_1-of-3">
+                <div class="slds-var-p-horizontal_xxx-small">
+                    <lightning:select 
+                        name="selectAscOrDesc" 
+                        value="{!v.ascOrDescForSorting}" 
+                        label="Ascending or descending:" 
+                        disabled="{!v.isDisabled}">
+                            <option value="ASC">A to Z</option>
+                            <option value="DESC">Z to A</option>
+                    </lightning:select>
+                </div>
+            </div>
+            <div class="slds-col  slds-size_1-of-3">
+                <div class="slds-var-p-left_xx-small">
+                    <lightning:select 
+                        name="selectNullsFirstLast" 
+                        value="{!v.nullsForSorting}" 
+                        label="Nulls:" 
+                        disabled="{!v.isDisabled}">
+                            <option value="NULLS FIRST">First</option>
+                            <option value="NULLS LAST">Last</option>
+                    </lightning:select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="slds-var-p-top_medium">
+        <div class="slds-grid">
+            <div class="slds-col  slds-size_3-of-12">
+                <div class="slds-var-p-right_xx-small">
+                    <lightning:select 
+                        name="selectFieldForFilter" 
+                        value="{!v.fieldForFilter}" 
+                        label="Filter results by:" 
+                        disabled="{!v.isDisabled}">
+                            <option value=""></option>
+                            <aura:iteration items="{!v.sObjFields}" var="field">
+                                <option value="{!field}">{!field}</option>
+                            </aura:iteration>
+                    </lightning:select>
+                </div>
+            </div>
+            <div class="slds-col  slds-size_3-of-12">
+                <div class="slds-var-p-horizontal_xxx-small">
+                    <lightning:select 
+                        name="selectFilterAction" 
+                        value="{!v.filterAction}" 
+                        label="Filter action:" 
+                        disabled="{!v.isDisabled}">
+                            <aura:iteration items="{!v.filterValues}" var="value">
+                                <option value="{!value.value}">{!value.label}</option>
+                            </aura:iteration>
+                    </lightning:select>
+                </div>
+            </div>
+            <div class="slds-col slds-size_6-of-12">
+                <div class="slds-var-p-left_xx-small">
+                    <lightning:input 
+                        name="filterValue" 
+                        value="{!v.filterValue}" 
+                        label="Enter filter value:" 
+                        disabled="{!v.isDisabled}"
+                    />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="slds-var-p-top_medium">
+        <div class="slds-grid">
+            <div class="slds-col slds-size_2-of-12">
+                <div>
+                    <lightning:input 
+                        name="limitInput" 
+                        value="{!v.limit}" 
+                        label="Max records:" 
+                        disabled="{!v.isDisabled}"
+                    />
+                </div>
+            </div>
+        </div>
+    </div>
+</aura:component>

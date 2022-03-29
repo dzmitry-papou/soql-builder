@@ -1,0 +1,101 @@
+<aura:component controller="SOQLBuilderController" implements="flexipage:availableForAllPageTypes" access="global">
+
+    <aura:attribute name="sObjects" type="List" /> <!-- sObjects to pick -->
+    <aura:attribute name="sObj" type="String" /> <!-- picked for query sObject -->
+    <aura:attribute name="sObjFields" type="List" /> <!-- all the fields of picked sObject -->
+    <aura:attribute name="sObjFieldWrappers" type="List" /> <!-- sObject field wrappers for lightning:dualListbox -->
+    <aura:attribute name="selectedSObjFields" type="List" default=""/> <!-- picked for query sObject fields -->
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" /> <!-- initialization -->
+    <aura:handler name="change" value="{!v.sObj}" action="{!c.getSObjectFields}" /> <!-- getting fields of sObject, that was picked -->
+
+    <aura:attribute name="query" type="String"/> <!-- full SOQL Query -->
+    <aura:attribute name="selectFromResult" type="String" /> <!-- "Select-From" query part -->
+    <aura:attribute name="filteredResult" type="String" /> <!-- "Filtered-Result" query part -->
+    <aura:attribute name="sortedResult" type="String" /> <!-- "Sorted-Result" query part -->
+    <aura:attribute name="limitedResult" type="String" /> <!-- "Limited-Result" query part -->
+    
+    <aura:handler name="sortingEvent" event="c:sortingEvent" action="{!c.getSortedResultQuery}" /> <!-- organization of "Sorted-Result" query part -->
+    <aura:handler name="filteringEvent" event="c:filteringEvent" action="{!c.getFilteredResultQuery}" /> <!-- organization of "Filtered-Result" query part -->
+    <aura:handler name="limitEvent" event="c:limitEvent" action="{!c.getLimitedResultQuery}" /> <!-- organization of "Limited-Result" query part -->
+
+    <aura:attribute name="tableData" type="List" /> <!-- data from query -->
+    <aura:attribute name="dataStack" type="List" /> <!-- stack of data for pagination -->
+    <aura:attribute name="HasPagination" type="Boolean"/> <!-- checkbox for pagination -->
+    <aura:attribute name="pagNum" type="Integer" default="0"/> <!-- number of pagination page -->
+    <aura:attribute name="isFirst" type="Boolean" default="true"/> <!-- checkbox for pagination -->
+    <aura:attribute name="isLast" type="Boolean" default="false"/> <!-- checkbox for pagination -->
+    <aura:attribute name="columns" type="List" /> <!-- data for organization of columns -->
+    <aura:attribute name="isVoid" type="Boolean" default="true"/> <!-- checkbox for display of table -->
+    <aura:attribute name="currentPage" type="Integer"/>
+    <aura:attribute name="allThePages" type="Integer"/>
+    
+    <aura:handler name="change" value="{!v.columns}" action="{!c.showHideTable}" /> <!-- set "is columns void" checkbox -->
+
+    <!-- HTML body -->
+
+    <div class="soql">
+        <div class="slds-card slds-grid ">
+            <div class="slds-col slds-var-p-around_medium slds-size_2-of-5">
+                    <lightning:select name="selectSObject" value="{!v.sObj}" label="Object:">
+                        <option value=""></option>
+                        <aura:iteration items="{!v.sObjects}" var="sObj">
+                            <option value="{!sObj}">{!sObj}</option>
+                        </aura:iteration>
+                    </lightning:select>
+                <div class="slds-var-p-top_medium">
+                    <lightning:dualListbox 
+                        name="fields"
+                        label="Fields:"
+                        sourceLabel="Available Fields"
+                        selectedLabel="Selected Fields"
+                        options="{!v.sObjFieldWrappers}"
+                        value="{!v.selectedSObjFields}"
+                        onchange="{!c.getSelectFromResultQuery}"
+                    />
+                </div>
+            </div>
+            <div class="slds-col slds-var-p-around_medium slds-size_3-of-5">
+                <c:queryConditions 
+                    sObjFields="{!v.sObjFields}"
+                    selectedSObjFields="{!v.selectedSObjFields}"/>
+            </div>
+        </div>
+        <div class="slds-card slds-var-p-around_medium">
+            <lightning:textarea 
+                name="query" 
+                label="Enter or modify a SOQL query below:" 
+                placeholder="Enter SOQL query: SELECT columns FROM type WHERE predicates | [...]"
+                value="{!v.query}"
+            />
+            <lightning:button label="Query" title="Neutral action" onclick="{!c.getTableData}"/>
+        </div>
+        <aura:if isTrue="{!v.isVoid}">
+            <aura:set attribute="else">
+                <div class="slds-card slds-var-p-around_medium">
+                    <aura:if isTrue="{!v.HasPagination}">
+                        <div class="slds-align_absolute-center slds-var-p-bottom_x-small">
+                            <lightning:button label="Previous" title="Neutral action" onclick="{!c.getPreviousDataStack}" disabled="{!v.isFirst}"/>
+                            <div class="slds-var-p-horizontal_small"> {!v.currentPage} of {!v.allThePages} </div>
+                            <lightning:button label="Next" title="Neutral action" onclick="{!c.getNextDataStack}"  disabled="{!v.isLast}"/>
+                        </div>
+                    </aura:if>
+                    <lightning:datatable 
+
+                        data="{! v.tableData }" 
+                        columns="{! v.columns }"
+                        keyField="Id"
+                        hideCheckboxColumn="true"
+                    />
+                    <aura:if isTrue="{!v.HasPagination}">
+                        <div class="slds-align_absolute-center slds-var-p-top_x-small">
+                            <lightning:button label="Previous" title="Neutral action" onclick="{!c.getPreviousDataStack}" disabled="{!v.isFirst}"/>
+                            <div class="slds-var-p-horizontal_small"> {!v.currentPage} of {!v.allThePages} </div>
+                            <lightning:button label="Next" title="Neutral action" onclick="{!c.getNextDataStack}"  disabled="{!v.isLast}"/>
+                        </div>
+                    </aura:if>
+                </div>
+            </aura:set>
+        </aura:if> 
+    </div>
+</aura:component>
